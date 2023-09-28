@@ -1,6 +1,8 @@
 #!/bin/bash
 zip=0
 help=0
+ret=0
+
 
 # options
 while getopts ":hz:" opt; do
@@ -13,7 +15,8 @@ while getopts ":hz:" opt; do
       zipname=$OPTARG
       ;;
     \?)
-      echo "Invalid option: -$OPTARG" 1>&2
+      echo "ERROR -$OPTARG" 1>&2
+      exit 2
       ;;
   esac
 done
@@ -24,17 +27,39 @@ if [[ $help -eq 1 ]]; then
   echo "Options:"
   echo "  -h: display help"
   echo "  -z: zip all FILES in directory"
-  exit 0
+  exit $ret
 fi
 
 while IFS= read -r line || [[ -n "$line" ]]; do
+  
   if [[ "${line%% *}" != "PATH" ]]; then
     continue   
   fi
   line_arr=($line)
   path_from_user=${line_arr[1]}
-  echo $path_from_user
 
+  if [[ ! -d $path_from_user ]]; then
+    echo "ERROR $path_from_user" 1>&2
+    ret=1
+    continue
+  fi
+
+  for file in $path_from_user/*; do
+    file_type=$(file ${file})
+
+    if [[ $($file_type | grep -q "symbolic link") ]]; then
+      echo "LINK $path_from_user/$file $(readlink -f $file)"
+    
+    elif [[ $($file_type | grep -q "directory") ]]; then
+      echo "DIR $path_from_user/$file"
+    
+    else
+      number_of_lines=$(wc -l < $file)
+      first_line=$(head -n 1 $file)
+      echo "FILE $path_from_user/$file $number_of_lines $first_line"
+    fi
+
+  done
 done
 
-exit 0
+exit $ret
