@@ -12,7 +12,7 @@ while getopts ":hz:" opt; do
       ;;
     z)
       zip=1
-      zipname=$OPTARG
+      zipname="output.tgz"
       ;;
     \?)
       echo "ERROR -$OPTARG" 1>&2
@@ -32,30 +32,32 @@ fi
 
 while IFS= read -r line || [[ -n "$line" ]]; do
   
-  if [[ "${line%% *}" != "PATH" ]]; then
+  read -r line_start path_from_user <<< "$line"
+
+  if [[ $line_start != "PATH" ]]; then
     continue   
   fi
-  line_arr=($line)
-  path_from_user=${line_arr[1]}
 
+  echo "$path_from_user";
+  pwd
   if [[ ! -d $path_from_user ]]; then
     echo "ERROR $path_from_user" 1>&2
     ret=1
     continue
   fi
 
-  for file in $path_from_user/*; do
-    file_type=$(file ${file})
+  for file in "$path_from_user"/*; do
+    file_type=$(file "${file}")
 
-    if [[ $($file_type | grep -q "symbolic link") ]]; then
-      echo "LINK $path_from_user/$file $(readlink -f $file)"
+    if $file_type | grep -q "symbolic link" ; then
+      echo "LINK $path_from_user/$file $(readlink -f "$file")"
     
-    elif [[ $($file_type | grep -q "directory") ]]; then
+    elif $file_type | grep -q "directory"; then
       echo "DIR $path_from_user/$file"
     
     else
-      number_of_lines=$(wc -l < $file)
-      first_line=$(head -n 1 $file)
+      number_of_lines=$(wc -l < "$file")
+      first_line=$(head -n 1 "$file")
       echo "FILE $path_from_user/$file $number_of_lines $first_line"
     fi
 
