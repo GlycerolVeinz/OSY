@@ -23,7 +23,10 @@ done
 
 if [[ $help -eq 1 ]]; then
   echo "Usage: ./hw01.sh [-h] [-z zipname]"
-  echo "Reads lines from input, if line starts with PATH prints all files on that path"
+  echo ""
+  echo "Reads lines from stdin,"
+  echo "if line is in format PATH 'path_from_user' then prints all files in 'path_from_user' directory" 
+  echo ""
   echo "Options:"
   echo "  -h: display help"
   echo "  -z: zip all FILES in directory"
@@ -38,8 +41,6 @@ while IFS= read -r line || [[ -n "$line" ]]; do
     continue   
   fi
 
-  echo "$path_from_user";
-  pwd
   if [[ ! -d $path_from_user ]]; then
     echo "ERROR $path_from_user" 1>&2
     ret=1
@@ -47,19 +48,37 @@ while IFS= read -r line || [[ -n "$line" ]]; do
   fi
 
   for file in "$path_from_user"/*; do
-    file_type=$(file "${file}")
+    file_type=$(file -b "${file}")
 
-    if $file_type | grep -q "symbolic link" ; then
-      echo "LINK $path_from_user/$file $(readlink -f "$file")"
-    
-    elif $file_type | grep -q "directory"; then
-      echo "DIR $path_from_user/$file"
-    
-    else
-      number_of_lines=$(wc -l < "$file")
-      first_line=$(head -n 1 "$file")
-      echo "FILE $path_from_user/$file $number_of_lines $first_line"
-    fi
+
+    # this one works, don't go back to prototype
+    case $file_type in
+      "symbolic link"*)
+        echo "LINK $path_from_user/$file $(readlink -f "$file")"
+        ;;
+      "directory"*)
+        echo "DIR $path_from_user/$file"
+        ;;
+      *)
+        number_of_lines=$(wc -l < "$file")
+        first_line=$(head -n 1 "$file")
+        echo "FILE $path_from_user/$file $number_of_lines $first_line"
+        ;;
+    esac
+
+    # ----PROTOTYPE CODE----
+    # if $file_type | grep -q "symbolic link" ; then
+    #   echo "LINK $path_from_user/$file $(readlink -f "$file")"
+
+    # elif $file_type | grep -q "directory" ; then
+    #   echo "DIR $path_from_user/$file"
+
+    # else
+    #   number_of_lines=$(wc -l < "$file")
+    #   first_line=$(head -n 1 "$file")
+    #   echo "FILE $path_from_user/$file $number_of_lines $first_line"
+    # fi
+    # ----------------------
 
   done
 done
