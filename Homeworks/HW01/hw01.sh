@@ -64,7 +64,7 @@ while IFS= read -r line || [[ -n "$line" ]]; do
       *)
         number_of_lines=$(wc -l < "$file")
         first_line=$(head -n 1 "$file")
-        echo "FILE $path_from_user/$file $number_of_lines $first_line"
+        echo "FILE '$file' $number_of_lines '$first_line'"
         if [[ $zip -eq 1 ]]; then
           tar -rf $zipname "$file"
         fi
