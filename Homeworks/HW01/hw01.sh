@@ -13,6 +13,7 @@ while getopts ":hz:" opt; do
     z)
       zip=1
       zipname="output.tgz"
+      tar -cf $zipname --files-from /dev/null
       ;;
     \?)
       echo "ERROR -$OPTARG" 1>&2
@@ -21,6 +22,7 @@ while getopts ":hz:" opt; do
   esac
 done
 
+# help option
 if [[ $help -eq 1 ]]; then
   echo "Usage: ./hw01.sh [-h] [-z zipname]"
   echo ""
@@ -33,6 +35,7 @@ if [[ $help -eq 1 ]]; then
   exit $ret
 fi
 
+# main
 while IFS= read -r line || [[ -n "$line" ]]; do
   
   read -r line_start path_from_user <<< "$line"
@@ -50,7 +53,6 @@ while IFS= read -r line || [[ -n "$line" ]]; do
   for file in "$path_from_user"/*; do
     file_type=$(file -b "${file}")
 
-
     # this one works, don't go back to prototype
     case $file_type in
       "symbolic link"*)
@@ -63,6 +65,9 @@ while IFS= read -r line || [[ -n "$line" ]]; do
         number_of_lines=$(wc -l < "$file")
         first_line=$(head -n 1 "$file")
         echo "FILE $path_from_user/$file $number_of_lines $first_line"
+        if [[ $zip -eq 1 ]]; then
+          tar -rf $zipname "$file"
+        fi
         ;;
     esac
 
