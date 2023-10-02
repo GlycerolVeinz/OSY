@@ -44,6 +44,8 @@ while IFS= read -r line || [[ -n "$line" ]]; do
     continue   
   fi
 
+
+  # TODO: change this check so that it doesn't go off on files
   if [[ ! -d $path_from_user ]]; then
     echo "ERROR $path_from_user" 1>&2
     ret=1
@@ -56,17 +58,17 @@ while IFS= read -r line || [[ -n "$line" ]]; do
     # this one works, don't go back to prototype
     case $file_type in
       "symbolic link"*)
-        echo "LINK $path_from_user/$file $(readlink -f "$file")"
+        echo "LINK '$file' '$(readlink -f "$file")'"
         ;;
       "directory"*)
-        echo "DIR $path_from_user/$file"
+        echo "DIR '$file'"
         ;;
       *)
         number_of_lines=$(wc -l < "$file")
         first_line=$(head -n 1 "$file")
         echo "FILE '$file' $number_of_lines '$first_line'"
         if [[ $zip -eq 1 ]]; then
-          tar -rf $zipname "$file"
+          tar -rf "$zipname" "$file"
         fi
         ;;
     esac
