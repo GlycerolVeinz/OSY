@@ -4,7 +4,7 @@ help=0
 ret=0
 
 # options
-while getopts ":hz:" opt; do
+while getopts ":hz" opt; do
   case $opt in
     h)
       help=1
@@ -48,8 +48,8 @@ while IFS= read -r line || [[ -n "$line" ]]; do
   fi
 
   # non existant path
-  if [[ ! -d $path_from_user ]]; then
-    echo "ERROR $path_from_user" 1>&2
+  if [[ (! -e $path_from_user) && (! -L $path_from_user) ]]; then
+    echo "ERROR '$path_from_user'" 1>&2
     ret=1
     continue
   fi
@@ -59,7 +59,13 @@ while IFS= read -r line || [[ -n "$line" ]]; do
   # determine file type, write output
   case $file_type in
       "symbolic link"*)
-        echo "LINK '$path_from_user' '$(readlink -f "$path_from_user")'"
+        link_path=$(readlink "$path_from_user")
+        echo "LINK '$path_from_user' '$link_path'"
+        ;;
+
+      "broken symbolic link"*)
+        link_path=$(readlink "$path_from_user")
+        echo "LINK '$path_from_user' '$link_path'"
         ;;
 
       "directory"*)
@@ -69,12 +75,11 @@ while IFS= read -r line || [[ -n "$line" ]]; do
       *)
         number_of_lines=$(wc -l < "$path_from_user")
         
-        first_line=$(head -n 1 "$path_from_user")
-        if [[ $? -ne 0 ]]; then
+        if ! first_line=$(head -n 1 "$path_from_user"); then
           ret=2
           exit $ret
         fi
-        
+
         echo "FILE '$path_from_user' $number_of_lines '$first_line'"
         if [[ $zip -eq 1 ]]; then
           tar -rf "$zipname" "$path_from_user"
