@@ -34,11 +34,8 @@ function print_numbered_lines(){
 
 
 function find_sentences_intext(){
-    original_ifs=$IFS
+    grep -oE '^[A-Z][^\.!?]+[\.!?]'
 
-    IFS=$'.!?'
-   
-    IFS=$original_ifs
     exit $SUCCESS
 }
 
