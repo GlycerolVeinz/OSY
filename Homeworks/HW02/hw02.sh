@@ -14,34 +14,44 @@ function print_help() {
 }
 
 function print_pdf_files(){
-    pdf_files=$(find . -type f -iname "*.pdf")
-    original_ifs=$IFS
-
-    IFS=$'\n'
-    for pdf in $pdf_files; do
-        echo "$pdf"
-    done
-
-    IFS=$original_ifs
+    all_files=$(ls -a)
+    grep -E "\.[pP][dD][fF]$" <<< "$all_files" | sort
+   
     exit $SUCCESS
 }
-
 
 function print_numbered_lines(){
     sed -n 's/^[+-]\?[0-9]\+//p'
     exit $SUCCESS
 }
 
+function split_to_sentences(){
+    text_line=$(tr '\n' ' ')
 
-function find_sentences_intext(){
-    grep -oE '^[A-Z][^\.!?]+[\.!?]'
+    while [[ $text_line =~ [[:upper:]][^\.?!]*[\.?!] ]]; do
+        echo "${BASH_REMATCH[0]}"
+        text_line=${text_line#*"${BASH_REMATCH[0]}"}
+    done
 
     exit $SUCCESS
 }
 
+function add_include_path(){
+    original_IFS=$IFS
+    IFS=
+    dop="$OPTARG"
 
-# options
-while getopts ":habcd" opt; do
+    while read -r line; do    
+        sed -e 's|\(#[[:space:]]*include[[:space:]]*<\)\(.*>\)|\1'"$dop"'\2|g' -e 's|\(#[[:space:]]*include[[:space:]]*"\)\(.*"\)|\1'"$dop"'\2|g' <<< "$line"
+    done
+
+    IFS=$original_IFS
+    exit $SUCCESS
+}
+
+
+
+while getopts ":habcd:" opt; do
     case $opt in
         h)
             print_help "$SUCCESS"
@@ -53,10 +63,10 @@ while getopts ":habcd" opt; do
             print_numbered_lines
             ;;
         c)
-            find_sentences_intext
+            split_to_sentences
             ;;
         d)
-            exit $SUCCESS
+            add_include_path
             ;;
         \?)
             print_help "$ERR_INVALID_ARG"

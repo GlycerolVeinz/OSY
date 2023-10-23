@@ -1,0 +1,26 @@
+#include<stdio.h>
+
+#include"foo.h"
+
+   # include	  <stdio.h> 
+
+void f() { "#include <stdio.h>"; }
+
+//#include "foo.h"
+
+/* #include "foo.h" */
+
+// #INCLUDE<foo.h>
+
+// #include"foo.h>
+
+// Include system header
+#include <foo.h>
+
+/* include header from this direcory */
+#include "bar.h"
+
+int main (int atgv, char **argv)
+{
+  return 0;
+}
