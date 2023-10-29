@@ -26,16 +26,7 @@ int main(void)
         // NSD CHILD
         if (nsd_pid == CHILD_SUCCESS)
         {
-            // close unused pipe ends
-            close(pipefd[PIPE_WRITE_FD]);
-
-            // redirect stdin to pipe
-            close(STDIN_FD);
-            dup2(pipefd[PIPE_READ_FD], STDIN_FD);
-            close(pipefd[PIPE_READ_FD]);
-
-            // *code*
-            execl("./nsd.exe", "nsd.exe", NULL);
+            nsd_process(pipefd);
         }
         // MAIN
         else
@@ -43,5 +34,4 @@ int main(void)
             parental_control(pipefd, gen_pid, nsd_pid)
         }
     }
-    exit(SUCCESS);
 }

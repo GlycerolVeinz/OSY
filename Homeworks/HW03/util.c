@@ -46,3 +46,13 @@ void exit_err(int err_code)
 	puts(err_msg);
 	exit(ret);
 }
+
+void checked_close(int fd)
+{
+    if (close(fd) == FAIL) exit_err(SYS_CALL_FAIL);
+}
+
+void checked_dup2(int oldfd, int newfd)
+{
+    if (dup2(oldfd, newfd) == FAIL) exit_err(SYS_CALL_FAIL);
+}

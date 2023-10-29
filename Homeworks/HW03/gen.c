@@ -11,12 +11,12 @@ sigterm_handler(int signum)
 void generator(int pipefd[2])
 {
     // close unused pipe ends
-    close(pipefd[PIPE_READ_FD]);
+    checked_close(pipefd[PIPE_READ_FD]);
 
     // redirect stdout to pipe
-    close(STDOUT_FD);
-    dup2(pipefd[PIPE_WRITE_FD], STDOUT_FD);
-    close(pipefd[PIPE_WRITE_FD]);
+    checked_close(STDOUT_FD);
+    checked_dup2(pipefd[PIPE_WRITE_FD], STDOUT_FD);
+    checked_close(pipefd[PIPE_WRITE_FD]);
 
     // *code*
     while (1)

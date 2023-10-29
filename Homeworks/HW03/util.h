@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 
 // my error codes
 #define FAILED_PIPE 100
@@ -62,4 +63,18 @@
  */
 void exit_err(int err_code);
 
+/**
+ * @brief Close file descriptor and check for errors
+ *
+ * @param fd file descriptor
+ */
+void checked_close(int fd);
+
+/**
+ * @brief Check for errors in dup2() call
+ *
+ * @param oldfd old file descriptor
+ * @param newfd new file descriptor
+ */
+void checked_dup2(int oldfd, int newfd);
 #endif // UTIL_H
