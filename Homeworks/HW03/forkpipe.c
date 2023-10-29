@@ -1,14 +1,5 @@
 #include "forkpipe.h"
 
-#define SLEEP_TIME 5
-
-#define STDIN_FD 0
-#define STDOUT_FD 1
-#define STDERR_FD 2
-
-#define PIPE_READ_FD 0
-#define PIPE_WRITE_FD 1
-
 int main(void)
 {
     // prepare pipe
@@ -24,16 +15,7 @@ int main(void)
     // GEN CHILD
     if (gen_pid == CHILD_SUCCESS)
     {
-        // close unused pipe ends
-        close(pipefd[PIPE_READ_FD]);
-
-        // redirect stdout to pipe
-        close(STDOUT_FD);
-        dup2(pipefd[PIPE_WRITE_FD], STDOUT_FD);
-        close(pipefd[PIPE_WRITE_FD]);
-
-        // *code*
-        printf("%d %d\n", (rand() % 4096), (rand() % 4096));
+        generator(pipefd);
     }
     else
     {
