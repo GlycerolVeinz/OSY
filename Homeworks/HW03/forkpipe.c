@@ -35,16 +35,12 @@ int main(void)
             close(pipefd[PIPE_READ_FD]);
 
             // *code*
+            execl("./nsd.exe", "nsd.exe", NULL);
         }
         // MAIN
         else
         {
-            // close unused pipe ends
-            close(pipefd[0]);
-            close(pipefd[1]);
-
-            // *code*
-            sleep(SLEEP_TIME);
+            parental_control(pipefd, gen_pid, nsd_pid)
         }
     }
     exit(SUCCESS);

@@ -3,15 +3,15 @@
 
 #include "util.h"
 
-/*
-    * sigterm_handler - handles SIGTERM signal, writes "GEN TERMINATED" to stdout and exits with code 0
-
-    * signum: sigterm int value
+/**
+ * @brief sigterm_handler - handles SIGTERM signal, writes "GEN TERMINATED" to stdout and exits with code 0
+ * @param signum: sigterm int value
 */
 void sigterm_handler(int signum);
 
-/*
-    * generator - generates random numbers and writes them to stdout within 1sec intervals
+/**
+ * @brief generator - generates random numbers and writes them to stdout within 1sec intervals
+ * @property needs to be terminated externally by SIGTERM signal
 */
 void generator(int pipefd[2]);
 

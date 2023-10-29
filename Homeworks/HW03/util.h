@@ -47,19 +47,19 @@
 #define SLEEP_TIME 5
 #define GEN_SLEEP_TIME 1
 
-/*
-    * exit_err - prints error message and exits with error code
-
-    * err_code: internal error code, that sets return code and error message
-
-    * err_codes(ret) and messages(msg):
-        * FAILED_PIPE: ret=2  msg=(empty string)
-        * FAILED_FORK: ret=2  msg=(empty string)
-        * FAILED_CHILD: ret=1 msg="ERROR"
-        * CHILD_SUCCESS: ret=0 msg="OK"
-        * GEN_SIG_TERM: ret=1 msg="GEN TERMINATED"
-        * default: ret=1 msg="Error: unknown error"
-*/
+/**
+ * @brief Exit program with error code
+ *
+ * @param err_code error code
+ *
+ * err_codes(ret) and messages(msg):
+ * @case FAILED_PIPE: ret=2  msg=(empty string)
+ * @case FAILED_FORK: ret=2  msg=(empty string)
+ * @case FAILED_CHILD: ret=1 msg="ERROR"
+ * @case CHILD_SUCCESS: ret=0 msg="OK"
+ * @case GEN_SIG_TERM: ret=1 msg="GEN TERMINATED"
+ * @default: ret=1 msg="Error: unknown error"
+ */
 void exit_err(int err_code);
 
 #endif // UTIL_H
