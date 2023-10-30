@@ -1,7 +1,10 @@
 #include "gen.h"
 
-sigterm_handler(int signum)
+volatile sig_atomic_t interupt = 0;
+
+void sigterm_handler(int signum)
 {
+    interupt = 1;
     if (signum == SIGTERM)
     {
         exit_err(GEN_SIG_TERM);
@@ -18,13 +21,12 @@ void generator(int pipefd[2])
     checked_dup2(pipefd[PIPE_WRITE_FD], STDOUT_FD);
     checked_close(pipefd[PIPE_WRITE_FD]);
 
+    if(signal(SIGTERM, sigterm_handler) == SIG_ERR) exit_err(FAILED_CHILD);
+
     // *code*
-    while (1)
+    while (!interupt)
     {
         printf("%d %d\n", (rand() % 4096), (rand() % 4096));
-
-        if(signal(SIGTERM, sigterm_handler) == SIG_ERR) exit_err(FAILED_CHILD);
-
         sleep(GEN_SLEEP_TIME);
     }
 }

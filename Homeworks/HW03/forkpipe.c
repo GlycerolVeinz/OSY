@@ -31,7 +31,7 @@ int main(void)
         // MAIN
         else
         {
-            parental_control(pipefd, gen_pid, nsd_pid)
+            parental_control(pipefd, gen_pid, nsd_pid);
         }
     }
 }
