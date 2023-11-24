@@ -1,0 +1,3 @@
+/home/glycerolveinz/Cvut/OSY/Homeworks/HW04/tryNo2/cmake-build-debug/CMakeFiles/tryNo2.dir
+/home/glycerolveinz/Cvut/OSY/Homeworks/HW04/tryNo2/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/glycerolveinz/Cvut/OSY/Homeworks/HW04/tryNo2/cmake-build-debug/CMakeFiles/rebuild_cache.dir
