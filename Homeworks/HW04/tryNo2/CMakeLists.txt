@@ -6,8 +6,8 @@ set(CMAKE_C_STANDARD 11)
 include_directories(.)
 
 add_executable(tryNo2
-        checkedMemory.c
-        checkedMemory.h
+        mem.c
+        mem.h
         LinkedList.c
         LinkedList.h
         LinkedListQueue.c

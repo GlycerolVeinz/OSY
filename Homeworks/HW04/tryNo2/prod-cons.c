@@ -2,24 +2,20 @@
 
 int producerRetVal = 0;
 
-int main(int argc, char const *argv[])
-{
+int main(int argc, char const *argv[]) {
     int numOfConsuments = getNumOfConsuments(argc, argv);
     ThreadSharedData *sharedData = sharedData_init(numOfConsuments);
 
     pthread_t producerId;
-    if (pthread_create(&producerId, NULL, producer, sharedData) != SUCCESS)
-    {
+    if (pthread_create(&producerId, NULL, producer, sharedData) != SUCCESS) {
         perror("Error: producer thread creation failed");
         sharedData_destroy(sharedData);
         exit(PROGRAMME_FAIL);
     }
 
-    for (int i = 0; i < numOfConsuments; ++i)
-    {
+    for (int i = 0; i < numOfConsuments; ++i) {
         pthread_t consumerId;
-        if (pthread_create(&consumerId, NULL, consumer, sharedData) != SUCCESS)
-        {
+        if (pthread_create(&consumerId, NULL, consumer, sharedData) != SUCCESS) {
             perror("Error: consumer thread creation failed");
             sharedData_destroy(sharedData);
             exit(PROGRAMME_FAIL);
@@ -29,57 +25,34 @@ int main(int argc, char const *argv[])
 
     pthread_join(producerId, NULL);
 
-//    pthread_mutex_lock(&sharedData->readMutex);
-    int producer_ret = producerRetVal;
-//    pthread_mutex_unlock(&sharedData->readMutex);
-
-     if (producer_ret != SUCCESS){
-//        pthread_mutex_lock(&sharedData->readMutex);
-        fprintf(stderr, "Error, producer exit");
-//        pthread_mutex_unlock(&sharedData->readMutex);
-
-         for (int i = 0; i < sharedData->bufferSize; ++i)
-         {
-             pthread_cancel(sharedData->consumerIds[i]);
-         }
+    if (getProducerRetVal(sharedData) != SUCCESS) {
+        cancelConsumers(sharedData);
         sharedData_destroy(sharedData);
         exit(PROGRAMME_FAIL);
     }
 
-    for (int i = 0; i < numOfConsuments; ++i)
-    {
-        pthread_join(sharedData->consumerIds[i], NULL);
-
-        pthread_mutex_lock(&sharedData->readMutex);
-        int consumer_ret = sharedData->retVal;
-        pthread_mutex_unlock(&sharedData->readMutex);
-
-        if (consumer_ret != SUCCESS)
-        {
-            fprintf(stderr, "Error, consumer %d failed", i);
-            sharedData_destroy(sharedData);
-            exit(PROGRAMME_FAIL);
-        }
-    }
+    cancelConsumers(sharedData);
 
     sharedData_destroy(sharedData);
     exit(SUCCESS);
 }
 
-void *producer(void *arg)
-{
-    ThreadSharedData *sharedData = (ThreadSharedData *)arg;
+void *producer(void *arg) {
+    ThreadSharedData *sharedData = (ThreadSharedData *) arg;
     int ret;
     int int_in;
     String str_in;
 
-    while ((ret = scanf("%d %ms\n", &int_in, &str_in)) == 2)
-    {
-        if (ret != 2)
-        {
+    while ((ret = scanf("%d %ms\n", &int_in, &str_in)) == 2) {
+        if (ret != 2) {
 
             fprintf(stderr, "Error: scanf failed");
-            producerRetVal = PROGRAMME_FAIL;
+
+            pthread_mutex_lock(&sharedData->readMutex);
+            sharedData->terminate = true;
+            sharedData->cancel = true;
+            sharedData->retVal = PROGRAMME_FAIL;
+            pthread_mutex_unlock(&sharedData->readMutex);
 
             pthread_exit(NULL);
         }
@@ -102,48 +75,27 @@ void *producer(void *arg)
     pthread_exit(NULL);
 }
 
-int getMyId(ThreadSharedData *sharedData)
-{
-    int id = -1;
-    pthread_t self = pthread_self();
 
-    pthread_mutex_lock(&sharedData->readMutex);
-    for (int i = 0; i < sharedData->bufferSize; ++i)
-    {
-        if (sharedData->consumerIds[i] == self)
-        {
-            id = i;
-            break;
-        }
-    }
-    pthread_mutex_unlock(&sharedData->readMutex);
-
-    return id;
-}
-
-bool shouldTerminate(ThreadSharedData *sharedData)
-{
-    pthread_mutex_lock(&sharedData->readMutex);
-    bool terminate = sharedData->terminate;
-    pthread_mutex_unlock(&sharedData->readMutex);
-    return terminate;
-}
-
-void *consumer(void *arg){
-    ThreadSharedData *sharedData = (ThreadSharedData *)arg;
-    int ret = SUCCESS;
+void *consumer(void *arg) {
+    ThreadSharedData *sharedData = (ThreadSharedData *) arg;
     int id = getMyId(sharedData);
-    if (id == -1){
+
+    if (id == -1) {
         fprintf(stderr, "Error: can't find myself (consumer)");
-        ret = PROGRAMME_FAIL;
-        pthread_mutex_lock(&sharedData->readMutex);
-        sharedData->retVal = ret;
-        pthread_mutex_unlock(&sharedData->readMutex);
-        pthread_exit(NULL);
+//        ret = PROGRAMME_FAIL;
+//        pthread_mutex_lock(&sharedData->readMutex);
+//        sharedData->retVal = ret;
+//        pthread_mutex_unlock(&sharedData->readMutex);
+//        pthread_exit(NULL);
     }
 
-    while (sem_wait(&sharedData->semaphore) && (!isBufferEmpty(sharedData) || !shouldTerminate(sharedData)))
-    {
+    while (!isBufferEmpty(sharedData) || !shouldTerminate(sharedData)) {
+        sem_wait(&sharedData->semaphore);
+
+        if (shouldCancel(sharedData) && isBufferEmpty(sharedData)) {
+            pthread_exit(NULL);
+        }
+
         pthread_mutex_lock(&sharedData->readMutex);
         node *n = (node *) pop(sharedData->buffer);
         DataItem *item = (DataItem *) n->data;

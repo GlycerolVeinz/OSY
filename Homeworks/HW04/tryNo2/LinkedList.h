@@ -5,7 +5,7 @@
 #ifndef TRYNO2_LINKEDLIST_H
 #define TRYNO2_LINKEDLIST_H
 
-#include "checkedMemory.h"
+#include "mem.h"
 
 typedef struct Node{
     void *data;

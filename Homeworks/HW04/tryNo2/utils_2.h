@@ -9,7 +9,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 
-#include "checkedMemory.h"
+#include "mem.h"
 #include "LinkedListQueue.h"
 
 #define PROGRAMME_FAIL 1
@@ -31,19 +31,28 @@ typedef struct {
 
     int bufferSize;
     bool terminate;
+    bool cancel;
     LinkedListQueue *buffer; 
 } ThreadSharedData;
 
 typedef char* String;
 
 ThreadSharedData *sharedData_init(int bufferSize);
-bool isBufferEmpty(ThreadSharedData *sharedData);
 void sharedData_destroy(ThreadSharedData *sharedData);
-int getNumOfConsuments(int argc, char const *argv[]);
 
-DataItem *dataItem_init(int int_in, String str_in);
-void sharedData_destroyMutexes(ThreadSharedData *sharedData);
 void sharedData_initMutexes(ThreadSharedData *sharedData);
+void sharedData_destroyMutexes(ThreadSharedData *sharedData);
+
+bool isBufferEmpty(ThreadSharedData *sharedData);
+bool shouldCancel(ThreadSharedData *sharedData);
+bool shouldTerminate(ThreadSharedData *sharedData);
+
+int getNumOfConsuments(int argc, char const *argv[]);
+DataItem *dataItem_init(int int_in, String str_in);
+int getMyId(ThreadSharedData *sharedData);
+int getProducerRetVal(ThreadSharedData *sharedData);
+void cancelConsumers(ThreadSharedData *sharedData);
+void joinConsumers(ThreadSharedData *sharedData);
 
 
 #endif

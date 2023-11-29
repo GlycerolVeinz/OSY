@@ -124,12 +124,12 @@
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "checkedMemory.c",
+			"path" : "mem.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
-			"path" : "checkedMemory.h",
+			"path" : "mem.h",
 			"sourceGroupIndex" : 1
 		},
 		{

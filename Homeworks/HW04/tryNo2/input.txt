@@ -1,8 +1,7 @@
-m
 20 foo
 5 bar
 4 beer
-7 almantarena
+7 antenatal
 10 aha
 3 me
 2 you
