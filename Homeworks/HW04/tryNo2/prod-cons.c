@@ -1,7 +1,5 @@
 #include "prod-cons.h"
 
-int producerRetVal = 0;
-
 int main(int argc, char const *argv[]) {
     int numOfConsuments = getNumOfConsuments(argc, argv);
     ThreadSharedData *sharedData = sharedData_init(numOfConsuments);
@@ -20,7 +18,10 @@ int main(int argc, char const *argv[]) {
             sharedData_destroy(sharedData);
             exit(PROGRAMME_FAIL);
         }
+
+        pthread_mutex_lock(&sharedData->readMutex);
         sharedData->consumerIds[i] = consumerId;
+        pthread_mutex_unlock(&sharedData->readMutex);
     }
 
     pthread_join(producerId, NULL);
@@ -31,22 +32,44 @@ int main(int argc, char const *argv[]) {
         exit(PROGRAMME_FAIL);
     }
 
-    cancelConsumers(sharedData);
+    joinConsumers(sharedData);
 
+    int ret = sharedData->retVal;
     sharedData_destroy(sharedData);
-    exit(SUCCESS);
+    exit(ret);
 }
 
 void *producer(void *arg) {
+    fprintf(stderr, "producer started\n");
     ThreadSharedData *sharedData = (ThreadSharedData *) arg;
     int ret;
     int int_in;
     String str_in;
 
-    while ((ret = scanf("%d %ms\n", &int_in, &str_in)) == 2) {
-        if (ret != 2) {
+    int firstChar = fgetc(stdin);
+    fprintf(stderr, "firstChar = %d\n", firstChar);
+    ungetc(firstChar, stdin);
+    bool notEndInput = firstChar != EOF && firstChar != 10;
+    if (notEndInput) {
+        while ((ret = scanf("%d %ms", &int_in, &str_in))) {
+            if (ret != 2) {
+                break;
+            }
+            DataItem *dataItem = (DataItem *) checked_mallock(sizeof(DataItem));
+            dataItem->str = str_in;
+            dataItem->count = int_in;
 
-            fprintf(stderr, "Error: scanf failed");
+            pthread_mutex_lock(&sharedData->readMutex);
+            push(sharedData->buffer, dataItem);
+            pthread_mutex_unlock(&sharedData->readMutex);
+            sem_post(&sharedData->semaphore);
+        }
+
+        bool scanfEndedNotProperly = ret != 2 && ret != EOF && ret != 0;
+        firstChar = fgetc(stdin);
+        notEndInput = firstChar != EOF && firstChar != 10;
+        if (scanfEndedNotProperly || notEndInput) {
+            fprintf(stderr, "Error: scanf failed\n");
 
             pthread_mutex_lock(&sharedData->readMutex);
             sharedData->terminate = true;
@@ -56,15 +79,6 @@ void *producer(void *arg) {
 
             pthread_exit(NULL);
         }
-
-        DataItem *dataItem = (DataItem *) checked_mallock(sizeof(DataItem));
-        dataItem->str = str_in;
-        dataItem->count = int_in;
-
-        pthread_mutex_lock(&sharedData->readMutex);
-        push(sharedData->buffer, dataItem);
-        pthread_mutex_unlock(&sharedData->readMutex);
-        sem_post(&sharedData->semaphore);
     }
 
     pthread_mutex_lock(&sharedData->readMutex);
@@ -72,6 +86,7 @@ void *producer(void *arg) {
     sharedData->retVal = SUCCESS;
     pthread_mutex_unlock(&sharedData->readMutex);
 
+    fprintf(stderr, "producer exited\n");
     pthread_exit(NULL);
 }
 
@@ -79,9 +94,11 @@ void *producer(void *arg) {
 void *consumer(void *arg) {
     ThreadSharedData *sharedData = (ThreadSharedData *) arg;
     int id = getMyId(sharedData);
+    fprintf(stderr, "consumer %d started\n", id);
+    int ret = SUCCESS;
 
     if (id == -1) {
-        fprintf(stderr, "Error: can't find myself (consumer)");
+        fprintf(stderr, "Error: can't find myself (consumer)\n");
 //        ret = PROGRAMME_FAIL;
 //        pthread_mutex_lock(&sharedData->readMutex);
 //        sharedData->retVal = ret;
@@ -92,7 +109,8 @@ void *consumer(void *arg) {
     while (!isBufferEmpty(sharedData) || !shouldTerminate(sharedData)) {
         sem_wait(&sharedData->semaphore);
 
-        if (shouldCancel(sharedData) && isBufferEmpty(sharedData)) {
+        if ((shouldCancel(sharedData) || shouldTerminate(sharedData)) && isBufferEmpty(sharedData)) {
+            fprintf(stderr, "consumer %d cancelled\n", id);
             pthread_exit(NULL);
         }
 
@@ -101,20 +119,30 @@ void *consumer(void *arg) {
         DataItem *item = (DataItem *) n->data;
         pthread_mutex_unlock(&sharedData->readMutex);
 
-        pthread_mutex_lock(&sharedData->writeMutex);
-        printf("Thread %d:", id);
-        for (int i = 0; i < item->count; ++i) {
-            printf(" %s", item->str);
+
+        int atoiRet = atoi(item->str);
+        if (atoiRet == 0 && item->count >= 0) {
+            pthread_mutex_lock(&sharedData->writeMutex);
+            printf("Thread %d:", id);
+            for (int i = 0; i < item->count; ++i) {
+                printf(" %s", item->str);
+            }
+            printf("\n");
+            pthread_mutex_unlock(&sharedData->writeMutex);
+        } else {
+            fprintf(stderr, "Error: invalid input\n");
+            ret = PROGRAMME_FAIL;
+            pthread_mutex_lock(&sharedData->readMutex);
+            sharedData->retVal = ret;
+            pthread_mutex_unlock(&sharedData->readMutex);
         }
-        printf("\n");
-        pthread_mutex_unlock(&sharedData->writeMutex);
 
         free(item->str);
         free(item);
         free(n);
     }
 
-    fprintf(stderr, "consumer exited\n");
+    fprintf(stderr, "consumer %d exited\n", id);
     pthread_exit(NULL);
 }
 

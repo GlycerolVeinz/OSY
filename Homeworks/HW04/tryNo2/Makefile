@@ -5,17 +5,21 @@ EXTRACFLAGS ?= $(EXTRA_CFLAGS)
 
 TARGET=prod-cons
 SOURCES=$(wildcard *.c)
-DEPENDENCIES=$(wildcard *.h)
+OBJS=$(patsubst %.c,%.o,$(SOURCES))
+HEADERS=$(wildcard *.h)
 
 all: $(TARGET)
 
-$(TARGET): $(SOURCES) $(DEPENDENCIES)
-	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -o $@ $(SOURCES)
+$(TARGET): $(OBJS) $(HEADERS)
+	$(CC) $(CFLAGS) $(EXTRACFLAGS) -o $@ $^ -lpthread
+
+%.o: %.c
+	$(CC) $(CFLAGS) $(EXTRACFLAGS) -c $< -o $@
+
 
 clean:
 	rm -f $(TARGET)
-	rm -f *.o
-	rm -f *.zip
+	rm -f $(OBJS)
 
-zip: clean
-	zip hw04.zip Makefile $(SOURCES) $(DEPENDENCIES)
+zip : $(SOURCES) $(HEADERS)
+	zip -r $(TARGET).zip $(SOURCES) Makefile $(HEADERS)

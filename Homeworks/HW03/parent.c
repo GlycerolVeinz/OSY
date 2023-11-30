@@ -15,5 +15,7 @@ void parental_control(int pipefd[2], pid_t gen_pid, pid_t nsd_pid)
     if (waitpid(gen_pid, &gen_status, 0) == FAIL) exit_err(FAILED_CHILD);
     if (waitpid(nsd_pid, &nsd_status, 0) == FAIL) exit_err(FAILED_CHILD);
 
+    if ((gen_status != 0) || (nsd_status != 0)) exit_err(FAILED_CHILD);
+
     exit_err(CHILD_SUCCESS);
 }

@@ -49,13 +49,6 @@ cmake_ninja_workdir = /home/glycerolveinz/Cvut/OSY/Homeworks/HW04/tryNo2/cmake-b
 
 build cmake_object_order_depends_target_tryNo2: phony || CMakeFiles/tryNo2.dir
 
-build CMakeFiles/tryNo2.dir/mem.c.o: C_COMPILER__tryNo2_unscanned_Debug /home/glycerolveinz/Cvut/OSY/Homeworks/HW04/tryNo2/mem.c || cmake_object_order_depends_target_tryNo2
-  DEP_FILE = CMakeFiles/tryNo2.dir/mem.c.o.d
-  FLAGS = -g -std=gnu11 -fdiagnostics-color=always
-  INCLUDES = -I/home/glycerolveinz/Cvut/OSY/Homeworks/HW04/tryNo2/.
-  OBJECT_DIR = CMakeFiles/tryNo2.dir
-  OBJECT_FILE_DIR = CMakeFiles/tryNo2.dir
-
 build CMakeFiles/tryNo2.dir/LinkedList.c.o: C_COMPILER__tryNo2_unscanned_Debug /home/glycerolveinz/Cvut/OSY/Homeworks/HW04/tryNo2/LinkedList.c || cmake_object_order_depends_target_tryNo2
   DEP_FILE = CMakeFiles/tryNo2.dir/LinkedList.c.o.d
   FLAGS = -g -std=gnu11 -fdiagnostics-color=always
@@ -92,7 +85,7 @@ build CMakeFiles/tryNo2.dir/utils_2.c.o: C_COMPILER__tryNo2_unscanned_Debug /hom
 #############################################
 # Link the executable tryNo2
 
-build tryNo2: C_EXECUTABLE_LINKER__tryNo2_Debug CMakeFiles/tryNo2.dir/mem.c.o CMakeFiles/tryNo2.dir/LinkedList.c.o CMakeFiles/tryNo2.dir/LinkedListQueue.c.o CMakeFiles/tryNo2.dir/prod-cons.c.o CMakeFiles/tryNo2.dir/utils_2.c.o
+build tryNo2: C_EXECUTABLE_LINKER__tryNo2_Debug CMakeFiles/tryNo2.dir/LinkedList.c.o CMakeFiles/tryNo2.dir/LinkedListQueue.c.o CMakeFiles/tryNo2.dir/prod-cons.c.o CMakeFiles/tryNo2.dir/utils_2.c.o
   FLAGS = -g
   OBJECT_DIR = CMakeFiles/tryNo2.dir
   POST_BUILD = :

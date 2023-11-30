@@ -9,7 +9,7 @@ int main(void)
 
     pid_t gen_pid, nsd_pid;
     gen_pid = fork();
-    if (gen_pid == FAILED_FORK)
+    if (gen_pid == FAIL)
         exit_err(FAILED_FORK);
 
     // GEN CHILD
@@ -20,7 +20,7 @@ int main(void)
     else
     {
         nsd_pid = fork();
-        if (nsd_pid == FAILED_FORK)
+        if (nsd_pid == FAIL)
             exit_err(FAILED_FORK);
 
         // NSD CHILD

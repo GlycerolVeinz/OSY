@@ -5,4 +5,8 @@
 #ifndef HW04_CPP_PROD_CONS_H
 #define HW04_CPP_PROD_CONS_H
 
+#include "utils.h"
+
+
+
 #endif //HW04_CPP_PROD_CONS_H

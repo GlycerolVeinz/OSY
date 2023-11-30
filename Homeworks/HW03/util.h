@@ -17,13 +17,13 @@
 #define GEN_SIG_TERM 103
 
 // my error messages
-#define ERR_ERR "Error: unknown error"
-#define ERROR_PIPE "Error: pipe() failed"
+#define ERR_ERR "Error: unknown error\n"
+#define ERROR_PIPE "Error: pipe() failed\n"
 
 // error messages for the task
-#define ERROR_FORK "ERROR"
-#define SUC_CHILD "OK"
-#define GEN_TERM "GEN TERMINATED"
+#define ERROR_FORK "ERROR\n"
+#define SUC_CHILD "OK\n"
+#define GEN_TERM "GEN TERMINATED\n"
 
 // success return codes
 #define SUCCESS 0

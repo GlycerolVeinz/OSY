@@ -5,7 +5,13 @@
 #ifndef TRYNO2_LINKEDLIST_H
 #define TRYNO2_LINKEDLIST_H
 
-#include "mem.h"
+
+#include <stdlib.h>
+#include <stdio.h>
+
+void *checked_mallock(size_t size);
+void *checked_calloc(size_t nmemb, size_t size);
+
 
 typedef struct Node{
     void *data;

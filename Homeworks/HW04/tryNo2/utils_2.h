@@ -9,7 +9,6 @@
 #include <pthread.h>
 #include <semaphore.h>
 
-#include "mem.h"
 #include "LinkedListQueue.h"
 
 #define PROGRAMME_FAIL 1
@@ -53,6 +52,7 @@ int getMyId(ThreadSharedData *sharedData);
 int getProducerRetVal(ThreadSharedData *sharedData);
 void cancelConsumers(ThreadSharedData *sharedData);
 void joinConsumers(ThreadSharedData *sharedData);
+void postConsumers(ThreadSharedData *sharedData);
 
 
 #endif

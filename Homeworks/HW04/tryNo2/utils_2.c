@@ -90,7 +90,7 @@ int getMyId(ThreadSharedData *sharedData) {
     pthread_mutex_lock(&sharedData->readMutex);
     for (int i = 0; i < sharedData->bufferSize; ++i) {
         if (sharedData->consumerIds[i] == self) {
-            id = i;
+            id = i + 1;
             break;
         }
     }
@@ -121,20 +121,25 @@ int getProducerRetVal(ThreadSharedData *sharedData) {
 }
 
 void joinConsumers(ThreadSharedData *sharedData) {
+    postConsumers(sharedData);
     for (int i = 0; i < sharedData->bufferSize; ++i) {
         pthread_join(sharedData->consumerIds[i], NULL);
     }
 }
 
+void postConsumers(ThreadSharedData *sharedData) {
+    for (int i = 0; i < sharedData->bufferSize; ++i) {
+        sem_post(&sharedData->semaphore);
+    }
+}
+
 void cancelConsumers(ThreadSharedData *sharedData) {
-    fprintf(stderr, "Error, producer exit");
+    fprintf(stderr, "Error, producer exit\n");
+
     pthread_mutex_lock(&sharedData->readMutex);
     sharedData->cancel = true;
     pthread_mutex_unlock(&sharedData->readMutex);
 
-    for (int i = 0; i < sharedData->bufferSize; ++i) {
-        sem_post(&sharedData->semaphore);
-    }
-
+    postConsumers(sharedData);
     joinConsumers(sharedData);
 }
